@@ -45,6 +45,20 @@
 		regulator-max-microvolt = <5000000>;
 		regulator-always-on;
 	};
+	
+	reg_ddc: ddc-io {
+		compatible = "regulator-fixed";
+		regulator-name = "ddc-io";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		enable-active-high;
+		gpio = <&pio 7 2 GPIO_ACTIVE_HIGH>; /* PH2 */
+	};
+	
+};
+
+&cpu0 {
+	cpu-supply = <&reg_dcdca>;
 };
 
 &ehci0 {
@@ -52,6 +66,11 @@
 };
 
 &ehci3 {
+	status = "okay";
+};
+
+&gpu {
+	mali-supply = <&reg_dcdcc>;
 	status = "okay";
 };
 
@@ -158,11 +177,12 @@
 			reg_dcdca: dcdca {
 				regulator-always-on;
 				regulator-min-microvolt = <810000>;
-				regulator-max-microvolt = <1080000>;
+				regulator-max-microvolt = <1160000>;
 				regulator-name = "vdd-cpu";
 			};
 
 			reg_dcdcc: dcdcc {
+				regulator-enable-ramp-delay = <32000>;
 				regulator-min-microvolt = <810000>;
 				regulator-max-microvolt = <1080000>;
 				regulator-name = "vdd-gpu";

@@ -43,8 +43,11 @@
 /dts-v1/;
 
 #include "sun50i-a64.dtsi"
+#include "sun50i-a64-cpu-opp.dtsi"
 
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/pwm/pwm.h>
 
 / {
 	model = "BananaPi-M64";
@@ -108,6 +111,22 @@
 	status = "okay";
 };
 
+&cpu0 {
+	cpu-supply = <&reg_dcdc2>;
+};
+
+&cpu1 {
+	cpu-supply = <&reg_dcdc2>;
+};
+
+&cpu2 {
+	cpu-supply = <&reg_dcdc2>;
+};
+
+&cpu3 {
+	cpu-supply = <&reg_dcdc2>;
+};
+
 &dai {
 	status = "okay";
 };
@@ -144,12 +163,12 @@
 	};
 };
 
-&i2c1 {
+&i2s2 {
 	status = "okay";
 };
 
-&i2c1_pins {
-	bias-pull-up;
+&mixer0 {
+	status = "okay";
 };
 
 &mdio {
@@ -163,7 +182,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&mmc0_pins>;
 	vmmc-supply = <&reg_dcdc1>;
-	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>;
+	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>; /* PF6 */
 	disable-wp;
 	bus-width = <4>;
 	status = "okay";
@@ -192,9 +211,11 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&mmc2_pins>, <&mmc2_ds_pin>;
 	vmmc-supply = <&reg_dcdc1>;
+	vqmmc-supply = <&reg_eldo1>;
 	bus-width = <8>;
 	non-removable;
 	cap-mmc-hw-reset;
+	mmc-hs200-1_8v;
 	status = "okay";
 };
 
@@ -203,6 +224,10 @@
 };
 
 &ohci1 {
+	status = "okay";
+};
+
+&r_ir {
 	status = "okay";
 };
 
@@ -304,8 +329,14 @@
 	regulator-name = "vcc-wifi";
 };
 
+&reg_dldo3 {
+	regulator-min-microvolt = <3300000>;
+	regulator-max-microvolt = <3300000>;
+	regulator-name = "avdd-csi";
+};
+
 &reg_dldo4 {
-	regulator-min-microvolt = <1800000>;
+	regulator-min-microvolt = <3300000>;
 	regulator-max-microvolt = <3300000>;
 	regulator-name = "vcc-wifi-io";
 };
@@ -316,9 +347,16 @@
 };
 
 &reg_eldo1 {
+	regulator-always-on;
 	regulator-min-microvolt = <1800000>;
 	regulator-max-microvolt = <1800000>;
 	regulator-name = "cpvdd";
+};
+
+&reg_eldo3 {
+	regulator-min-microvolt = <1800000>;
+	regulator-max-microvolt = <1800000>;
+	regulator-name = "dvdd-csi";
 };
 
 &reg_fldo1 {
@@ -337,6 +375,13 @@
 	regulator-min-microvolt = <1100000>;
 	regulator-max-microvolt = <1100000>;
 	regulator-name = "vdd-cpus";
+};
+
+&reg_ldo_io0 {
+	regulator-min-microvolt = <3300000>;
+	regulator-max-microvolt = <3300000>;
+	regulator-name = "vcc-usb";
+	status = "okay";
 };
 
 &reg_rtc_ldo {
@@ -363,12 +408,19 @@
 			"MIC1", "Onboard Microphone";
 };
 
+&sound_hdmi {
+	status = "okay";
+};
+
+
+/* On debug connector */
 &uart0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart0_pb_pins>;
 	status = "okay";
 };
 
+/* Bluetooth */
 &uart1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart1_pins>, <&uart1_rts_cts_pins>;
@@ -377,6 +429,7 @@
 
 	bluetooth {
 		compatible = "brcm,bcm43438-bt";
+		max-speed = <1500000>;
 		clocks = <&rtc 1>;
 		clock-names = "lpo";
 		vbat-supply = <&reg_dldo2>;

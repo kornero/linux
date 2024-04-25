@@ -688,6 +688,13 @@ L:	linux-crypto@vger.kernel.org
 S:	Maintained
 F:	drivers/crypto/sunxi-ss/
 
+ALLWINNER THERMAL DRIVER
+M:	Yangtao Li <tiny.windzz@gmail.com>
+L:	linux-pm@vger.kernel.org
+S:	Maintained
+F:	Documentation/devicetree/bindings/thermal/sun8i-thermal.yaml
+F:	drivers/thermal/sun8i_thermal.c
+
 ALLWINNER VPU DRIVER
 M:	Maxime Ripard <mripard@kernel.org>
 M:	Paul Kocialkowski <paul.kocialkowski@bootlin.com>
@@ -2831,6 +2838,19 @@ S:	Supported
 F:	include/linux/audit.h
 F:	include/uapi/linux/audit.h
 F:	kernel/audit*
+
+AUFS (advanced multi layered unification filesystem) FILESYSTEM
+M:	"J. R. Okajima" <hooanon05g@gmail.com>
+L:	aufs-users@lists.sourceforge.net (members only)
+L:	linux-unionfs@vger.kernel.org
+S:	Supported
+W:	http://aufs.sourceforge.net
+T:	git://github.com/sfjro/aufs4-linux.git
+F:	Documentation/ABI/testing/debugfs-aufs
+F:	Documentation/ABI/testing/sysfs-aufs
+F:	Documentation/filesystems/aufs/
+F:	fs/aufs/
+F:	include/uapi/linux/aufs_type.h
 
 AUXILIARY DISPLAY DRIVERS
 M:	Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>
@@ -7356,6 +7376,12 @@ W:	http://www.highpoint-tech.com
 S:	Supported
 F:	Documentation/scsi/hptiop.txt
 F:	drivers/scsi/hptiop.c
+
+HIMAX HM5065 SENSOR DRIVER
+M:	Ondrej Jirman <kernel@xff.cz>
+L:	linux-media@vger.kernel.org
+S:	Supported
+F:	drivers/media/i2c/hm5065.c
 
 HIPPI
 M:	Jes Sorensen <jes@trained-monkey.org>

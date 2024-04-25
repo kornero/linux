@@ -2171,6 +2171,13 @@ static const struct flash_info spi_nor_ids[] = {
 
 	{ "at45db081d", INFO(0x1f2500, 0, 64 * 1024, 16, SECT_4K) },
 
+	/* BergMicro Flashes */
+	{ "bg25q80", INFO(0xe04014, 0, 64 * 1024,  16, SECT_4K) },
+	{ "bg25q16", INFO(0xe04015, 0, 64 * 1024,  32, SECT_4K) },
+	{ "bg25q32", INFO(0xe04016, 0, 64 * 1024,  64, SECT_4K) },
+	{ "bg25q64", INFO(0xe04017, 0, 64 * 1024, 128, SECT_4K) },
+	{ "bg25q128", INFO(0xe04018, 0, 64 * 1024, 256, SECT_4K) },
+
 	/* EON -- en25xxx */
 	{ "en25f32",    INFO(0x1c3116, 0, 64 * 1024,   64, SECT_4K) },
 	{ "en25p32",    INFO(0x1c2016, 0, 64 * 1024,   64, 0) },
@@ -4994,6 +5001,22 @@ static int spi_nor_probe(struct spi_mem *spimem)
 	if (!nor)
 		return -ENOMEM;
 
+	nor->reg_vdd = devm_regulator_get(&spi->dev, "vdd");
+	if (IS_ERR(nor->reg_vdd)) {
+		ret = PTR_ERR(nor->reg_vdd);
+		if (ret != -EPROBE_DEFER)
+			dev_err(&spi->dev, "unable to get regulator: %d\n", ret);
+		return ret;
+	}
+
+	ret = regulator_enable(nor->reg_vdd);
+	if (ret) {
+		dev_err(&spi->dev, "unable to enable regulator: %d\n", ret);
+		return ret;
+	}
+
+	msleep(5);
+
 	nor->spimem = spimem;
 	nor->dev = &spi->dev;
 	spi_nor_set_flash_node(nor, spi->dev.of_node);
@@ -5021,7 +5044,7 @@ static int spi_nor_probe(struct spi_mem *spimem)
 
 	ret = spi_nor_scan(nor, flash_name, &hwcaps);
 	if (ret)
-		return ret;
+		goto err_reg_disable;
 
 	/*
 	 * None of the existing parts have > 512B pages, but let's play safe
@@ -5034,12 +5057,20 @@ static int spi_nor_probe(struct spi_mem *spimem)
 		nor->bouncebuf = devm_kmalloc(nor->dev,
 					      nor->bouncebuf_size,
 					      GFP_KERNEL);
-		if (!nor->bouncebuf)
-			return -ENOMEM;
+		if (!nor->bouncebuf) {
+			ret = -ENOMEM;
+			goto err_reg_disable;
+		}
 	}
 
-	return mtd_device_register(&nor->mtd, data ? data->parts : NULL,
+	ret = mtd_device_register(&nor->mtd, data ? data->parts : NULL,
 				   data ? data->nr_parts : 0);
+	if (!ret)
+		return 0;
+
+err_reg_disable:
+	regulator_disable(nor->reg_vdd);
+	return ret;
 }
 
 static int spi_nor_remove(struct spi_mem *spimem)
@@ -5047,6 +5078,7 @@ static int spi_nor_remove(struct spi_mem *spimem)
 	struct spi_nor *nor = spi_mem_get_drvdata(spimem);
 
 	spi_nor_restore(nor);
+	regulator_disable(nor->reg_vdd);
 
 	/* Clean up MTD stuff. */
 	return mtd_device_unregister(&nor->mtd);

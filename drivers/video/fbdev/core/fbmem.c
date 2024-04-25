@@ -53,7 +53,7 @@ EXPORT_SYMBOL(registered_fb);
 int num_registered_fb __read_mostly;
 EXPORT_SYMBOL(num_registered_fb);
 
-bool fb_center_logo __read_mostly;
+bool fb_center_logo __read_mostly = true;
 EXPORT_SYMBOL(fb_center_logo);
 
 static struct fb_info *get_fb_info(unsigned int idx)
